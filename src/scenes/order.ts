@@ -34,9 +34,8 @@ const order = new WizardScene("OrderScene",
         }
 
         (ctx.wizard.state as any).link = link[0]
-        const { message_id } = await ctx.reply("Введите ваш вариант или размер", inlineKeyboard([button.callback("Как определиться с размером?", "size-help")]));
+        ctx.reply("Введите ваш вариант или размер", inlineKeyboard([button.callback("Как определиться с размером?", "size-help")]));
         
-        (ctx.wizard.state as any).message_id = message_id
         ctx.wizard.next()
     },
     (ctx) => {
@@ -58,7 +57,7 @@ const order = new WizardScene("OrderScene",
 )
 
 order.action("link-help", async (ctx) => {
-    await ctx.replyWithVideo("BAACAgIAAxkBAAIFf2fKBHJWBR7tzreaNTOMFCxMv3mOAALUawACwd9RStytSrpkgW0iNgQ")
+    ctx.replyWithVideo("BAACAgIAAxkBAAIFf2fKBHJWBR7tzreaNTOMFCxMv3mOAALUawACwd9RStytSrpkgW0iNgQ")
 })
 
 order.action("size-help", (ctx) => {

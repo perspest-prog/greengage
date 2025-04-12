@@ -1,3 +1,5 @@
+import { env } from "node:process"
+
 import { Telegraf, session } from "telegraf"
 import { inlineKeyboard, keyboard, button } from "telegraf/markup"
 import { SceneContext, Stage, } from "telegraf/scenes"
@@ -5,7 +7,7 @@ import { message } from "telegraf/filters"
 
 import { calculate, order, question, answer, rates, receipt } from "./scenes"
 
-const bot = new Telegraf<SceneContext>("7329082141:AAFQI7gg-Y9JdGgUpoTyvB3VDfaGFyr-kY4")
+const bot = new Telegraf<SceneContext>(env.TOKEN)
 const scenes = new Stage([calculate, order, question as any, answer, rates, receipt])
 
 bot.use(session())
