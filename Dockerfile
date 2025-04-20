@@ -10,11 +10,12 @@ COPY package.json .
 
 COPY . .
 RUN yarn install
-RUN yarn run build
+RUN yarn build
 
 FROM base AS production
 
 ENV TOKEN=${TOKEN}
+ENV NODE_ENV=production
 
 WORKDIR /app
 COPY package.json  .
@@ -22,4 +23,4 @@ COPY package.json  .
 RUN yarn install --production
 COPY --from=build /app/dist ./dist
 
-CMD [ "node", "dist/index.js" ]
+CMD [ "yarn", "start" ]

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "dist",
+    "lib": ["ESNext"]
     // "esModuleInterop": true,
     // "target": "es5",
     // "allowJs": true,
