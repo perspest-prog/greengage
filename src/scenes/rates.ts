@@ -53,6 +53,17 @@ const rates = new WizardScene("RatesScene",
         }
 
         RATES[(ctx.scene.state as any).rate] = value
+
+        ctx.reply(
+            "Вот новые курсы\n\n" +
+            `• Курс юаня к usdt: <b>${RATES.CNY_TO_USDT}</b>\n` +
+            `• Курс usdt к рублю: <b>${RATES.USDT_TO_RUB}</b>\n` +
+            `• Курс ЦБ юаня к евро: <b>${RATES.CNY_TO_EUR}</b>\n` + 
+            `• Курс ЦБ рубля к евро: <b>${RATES.EUR_TO_RUB}</b>\n`,
+            {
+                parse_mode: "HTML"
+            }
+        )
         ctx.scene.leave()
     }
 )
