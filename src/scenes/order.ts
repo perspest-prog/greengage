@@ -4,24 +4,45 @@ import { inlineKeyboard, button } from "telegraf/markup";
 
 const deliveryButtons = new Composer<WizardContext>()
 
-deliveryButtons.action("ex", (ctx) => {
+deliveryButtons.action("ex", async (ctx) => {
     (ctx.scene.state as any).delivery = "ex"
-    ctx.reply("Введите ссылку", inlineKeyboard([button.callback("Где и как найти ссылку", "link-help")]))
+    const { message_id } = await ctx.reply(
+        "Теперь нужна <b><i>ссылка на товар</i></b>. Отправляй без всяких раздумий.",
+        {
+            parse_mode: "HTML",
+            reply_markup: inlineKeyboard([button.callback("Где найти ссылку", "link-help")]).reply_markup
+        }
+    );
+    (ctx.session as any).link_message = message_id
     ctx.wizard.next()
 })
 
-deliveryButtons.action("ec", (ctx) => {
+deliveryButtons.action("ec", async (ctx) => {
     (ctx.scene.state as any).delivery = "ec"
-    ctx.reply("Введите ссылку", inlineKeyboard([button.callback("Где и как найти ссылку", "link-help")]))
+    const { message_id } = await ctx.reply(
+        "Теперь нужна <b><i>ссылка на товар</i></b>. Отправляй без всяких раздумий.",
+        {
+            parse_mode: "HTML",
+            reply_markup: inlineKeyboard([button.callback("Где найти ссылку", "link-help")]).reply_markup
+        }
+    );
+    (ctx.session as any).link_message = message_id
     ctx.wizard.next()
 })
 
 const order = new WizardScene("OrderScene",
-    (ctx) => {
-        ctx.reply("Выберите тариф доставки", inlineKeyboard([[
-            button.callback("Экспресс", "ex"),
-            button.callback("Эконом", "ec"),
-        ]]))
+    async (ctx) => {
+        await ctx.telegram.editMessageReplyMarkup(ctx.chat.id, (ctx.session as any).calcMessage, null, { inline_keyboard: null })
+        await ctx.reply(
+            "Посмотри на цену и выбери <b><i>тариф доставки</i></b>, удобный лично тебе",
+            {
+                parse_mode: "HTML",
+                reply_markup: inlineKeyboard([[
+                    button.callback("Экспресс", "ex"),
+                    button.callback("Эконом", "ec"),
+                ]]).reply_markup
+            }
+        )
         ctx.wizard.next()
     },
     deliveryButtons,
@@ -30,24 +51,45 @@ const order = new WizardScene("OrderScene",
         const link = message.match(/https:\/\/dw4.co\/t\/A\/[A-Za-z0-9]{8}/)
 
         if (!link || link.length !== 1) {
-            return ctx.reply("В сообщении нет ссылки на пойзон")
+            return ctx.reply(
+                "<i>Ты жулик!</i>\n\n" +
+                "В сообщенни нет ссылки на пойзон.",
+                {
+                    parse_mode: "HTML"
+                }
+            )
         }
 
         (ctx.wizard.state as any).link = link[0]
-        ctx.reply("Введите ваш вариант или размер", inlineKeyboard([button.callback("Как определиться с размером?", "size-help")]));
+        const { message_id } = await ctx.reply(
+            "Отлично! Осталось совсем чуть-чуть!\n" + 
+            "Введи <b><i>вариант размера</i></b> товара",
+            {
+                parse_mode: "HTML",
+                reply_markup: inlineKeyboard([button.callback("Где найти размер", "size-help")]).reply_markup
+            }
+        );
+        (ctx.session as any).size_message = message_id
         
         ctx.wizard.next()
     },
     (ctx) => {
         (ctx.wizard.state as any).variant = (ctx.message as any).text
 
-        ctx.reply("Ваша заявка отправлена администратору, ожидайте")
+        ctx.reply(
+            "Всё!\n" +
+            "Теперь твоя заявка была отправлена администратору. Ответ придет в рабочие часы. Подожди пару мнговений.",
+            {
+                parse_mode: "HTML",
+                reply_markup: inlineKeyboard([button.callback("Поторопить", "lala")]).reply_markup
+            }
+        )
 
         ctx.telegram.sendMessage(
             -4650285032,
             `Пользователь @${ctx.from.username} отправил заявку на заказ\n\nCсылка: ${(ctx.wizard.state as any).link}\n\nЦена: ${(ctx.wizard.state as any).price}\n\nКатегория: ${(ctx.wizard.state as any).category}\n\nРазмер или вариант: ${(ctx.wizard.state as any).variant}\n\nВариант доставки: ${(ctx.wizard.state as any).delivery}`,
             inlineKeyboard([[
-                button.callback("Послать нахуй", "deny " + JSON.stringify({id: ctx.from.id, price: (ctx.scene.state as any).shipPrice})),
+                button.callback("Отклонить товар", "deny " + JSON.stringify({id: ctx.from.id, price: (ctx.scene.state as any).shipPrice})),
                 button.callback("Принять товар", "accept " + JSON.stringify({id: ctx.from.id, price: (ctx.scene.state as any).shipPrice})),
             ]])
         )
@@ -57,11 +99,13 @@ const order = new WizardScene("OrderScene",
 )
 
 order.action("link-help", async (ctx) => {
-    ctx.replyWithVideo("BAACAgIAAxkBAAIFf2fKBHJWBR7tzreaNTOMFCxMv3mOAALUawACwd9RStytSrpkgW0iNgQ")
+    await ctx.replyWithVideo("BAACAgIAAxkBAAIFf2fKBHJWBR7tzreaNTOMFCxMv3mOAALUawACwd9RStytSrpkgW0iNgQ")
+    await ctx.telegram.editMessageReplyMarkup(ctx.chat.id, (ctx.session as any).link_message, undefined, {inline_keyboard: []})
 })
 
-order.action("size-help", (ctx) => {
-    ctx.replyWithVideo("BAACAgIAAxkBAAIF1mfPHe31PTnYqNyBUMRZC7otVn5lAAJsaAACWudBSjEBh938mUiPNgQ")
+order.action("size-help", async (ctx) => {
+    await ctx.replyWithVideo("BAACAgIAAxkBAAIF1mfPHe31PTnYqNyBUMRZC7otVn5lAAJsaAACWudBSjEBh938mUiPNgQ")
+    await ctx.telegram.editMessageReplyMarkup(ctx.chat.id, (ctx.session as any).size_message, undefined, {inline_keyboard: []})
 })
 
 export default order;

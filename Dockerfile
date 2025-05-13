@@ -14,7 +14,6 @@ RUN yarn build
 
 FROM base AS production
 
-ENV TOKEN=${TOKEN}
 ENV NODE_ENV=production
 
 WORKDIR /app
