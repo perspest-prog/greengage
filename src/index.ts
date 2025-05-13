@@ -13,7 +13,7 @@ bot.use(session())
 bot.use(scenes.middleware())
 
 bot.action("calc", Stage.enter("CalculateScene") as any)
-bot.hears("Задать курсы", Stage.enter("RatesScene") as any)
+bot.action("rates", Stage.enter("RatesScene") as any)
 
 bot.action(/deny/, (ctx) => {
     const { id, price } = JSON.parse(ctx.match.input.split(" ").pop())
@@ -89,7 +89,7 @@ bot.start((ctx) => {
             reply_markup: inlineKeyboard([
                 [button.callback("Калькулятор", "calc")],
                 [button.url("Отзывы", "https://t.me/greenfeedback"), button.url("Связаться с поддержкой", "https://t.me/greenmngr")],
-                ["zheksnk", "vanyayep"].includes(ctx.from.username) ? [button.callback("Задать курсы", "lalala")] : []
+                ["zheksnk", "vanyayep"].includes(ctx.from.username) ? [button.callback("Задать курсы", "rates")] : []
             ]).reply_markup
         }
     )

@@ -6,9 +6,8 @@ FROM node:${NODE_VERSION}-alpine${ALPINE} AS base
 FROM base AS build
 
 WORKDIR /app
-COPY package.json .
-
 COPY . .
+
 RUN yarn install
 RUN yarn build
 
@@ -19,7 +18,8 @@ ENV NODE_ENV=production
 WORKDIR /app
 COPY package.json  .
 
-RUN yarn install --production
 COPY --from=build /app/dist ./dist
+
+RUN yarn install
 
 CMD [ "yarn", "start" ]
