@@ -20,9 +20,9 @@ bot.action(/deny/, (ctx) => {
     
     ctx.scene.enter("ReviewScene", { id })
 })
-bot.action(/accept/, (ctx) => {
+bot.action(/accept/, async (ctx) => {
     const { id, price } = JSON.parse(ctx.match.input.split(" ").pop())
-    ctx.telegram.sendMessage(
+    const { message_id } = await ctx.telegram.sendMessage(
         id,
         "Твоя заявка была <b><i>одобрена</i></b> администратором!\n\n" +
         `Итого к оплате: <b>${price}₽</b>\n\n` + 
@@ -36,13 +36,28 @@ bot.action(/accept/, (ctx) => {
             reply_markup: inlineKeyboard([button.callback("Заказ оплачен", "order_paid")]).reply_markup
         }
     )
+    await ctx.telegram.editMessageReplyMarkup(
+        id,
+        message_id,
+        null,
+        inlineKeyboard([button.callback("Заказ оплачен", "order_paid " + message_id)]).reply_markup
+    )
 })
 
-bot.action("order_paid", async (ctx) => {
+bot.action(/order_paid/, async (ctx) => {
+    const message_id = Number(ctx.match.input.split(" ").pop())
+    await ctx.telegram.editMessageReplyMarkup(
+        ctx.chat.id,
+        message_id,
+        null,
+        {
+            inline_keyboard: []
+        }
+    )
     await ctx.reply(
-        "Спасибо!\n" +
-        "Вот твой чек.\n" +
-        "Уведомлять о статусе заказа будет поддержка, но если что можешь обратиться к ней сам.",
+        "Супер!\n" +
+        "В течении рабочего дня менеджер обработает твой платеж и я скину чек по выкупу товара. Это не заставит тебя долго ждать.\n" + 
+        "Спасибо, что выбрал именно нас!  🙏",
         {
             parse_mode: "HTML"
         }

@@ -11,13 +11,23 @@ photo.on(message("photo"), (ctx) => {
         (ctx.wizard.state as any).chat_id,
         file_id,
         {
-            caption: "Спасибо, что выбрали нас!\nВся информация по статусу заказа будет поступать вам через бота",
+            caption: "Спасибо!\n" +
+                     "Вот твой чек.\n" +
+                     "Уведомлять о статусе заказа будет поддержка, но если что можешь обратиться к ней сам.",
+            parse_mode: "HTML",
             reply_markup: inlineKeyboard([button.url("Связаться с поддержкой", "https://t.me/greenmngr")]).reply_markup
         }
     )
+    ctx.scene.leave()
 })
 
-const receipt = new WizardScene("ReceiptScene", photo)
+const receipt = new WizardScene("ReceiptScene",
+    (ctx) => {
+        ctx.reply("Пришли чек сучка")
+        ctx.wizard.next()
+    },
+    photo
+)
 
 
 export default receipt
